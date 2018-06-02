@@ -10,7 +10,6 @@ import akka.stream.alpakka.slick.scaladsl.Slick
 import akka.stream.scaladsl.Source
 import org.slf4j.LoggerFactory
 import slick.ast.BaseTypedType
-import slick.jdbc.JdbcProfile
 
 import scala.concurrent.ExecutionContextExecutor
 
@@ -26,9 +25,9 @@ case class Hospital(
                      id: Option[Long] = Option.empty
                    )
 
-class HospitalRepository(val driver: JdbcProfile) {
+class HospitalRepository(implicit val session: SlickSession) {
 
-  import driver.api._
+  import session.profile.api._
 
   val pkType = implicitly[BaseTypedType[Long]]
   val tableQuery = TableQuery[Hospitals]
@@ -72,7 +71,7 @@ object Main extends App {
   implicit val session: SlickSession = SlickSession.forConfig("slick-postgres")
   system.registerOnTermination(() => session.close())
 
-  val hospitalRepository = new HospitalRepository(session.profile)
+  val hospitalRepository = new HospitalRepository
   val tableQuery = hospitalRepository.tableQuery
   hospitalRepository.findAll
     .log("hospital")
