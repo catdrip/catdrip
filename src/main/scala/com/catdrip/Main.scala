@@ -2,11 +2,12 @@ package com.catdrip
 
 import java.sql.Date
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.slick.javadsl.SlickSession
 import akka.stream.alpakka.slick.scaladsl.Slick
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.Source
 import org.slf4j.LoggerFactory
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcProfile
@@ -33,7 +34,7 @@ class HospitalRepository(val driver: JdbcProfile) {
   val tableQuery = TableQuery[Hospitals]
   type TableType = Hospitals
 
-  def findAll = tableQuery.result
+  def findAll: Source[Hospital, NotUsed] = Slick.source(tableQuery.result)
 
   class Hospitals(tag: Tag) extends Table[Hospital](tag, "hospital") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -73,7 +74,7 @@ object Main extends App {
 
   val hospitalRepository = new HospitalRepository(session.profile)
   val tableQuery = hospitalRepository.tableQuery
-  Slick.source(hospitalRepository.findAll)
+  hospitalRepository.findAll
     .log("hospital")
     .runForeach {
       println(_)
