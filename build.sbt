@@ -38,9 +38,12 @@ libraryDependencies ++= {
 
   def slickVersion = "3.2.1"
 
+  def postgreDriverVersion = "42.2.2"
+
   Seq(
     slickGroup %% "slick" % slickVersion,
-    slickGroup %% "slick-hikaricp" % slickVersion
+    slickGroup %% "slick-hikaricp" % slickVersion,
+    "org.postgresql" % "postgresql" % postgreDriverVersion
   )
 }
 
